@@ -1,4 +1,4 @@
-module board-backend
+module go-api-structure
 
 go 1.19
 

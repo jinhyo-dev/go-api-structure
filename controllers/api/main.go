@@ -1,10 +1,10 @@
 package main
 
 import (
-	"board-backend/repository"
-	"board-backend/repository/dbrepo"
 	"flag"
 	"fmt"
+	"go-api-structure/repository"
+	"go-api-structure/repository/dbrepo"
 	"log"
 	"net/http"
 )

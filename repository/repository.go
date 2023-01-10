@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"board-backend/models"
+	"go-api-structure/models"
 	"gorm.io/gorm"
 )
 
