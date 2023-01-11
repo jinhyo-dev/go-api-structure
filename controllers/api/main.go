@@ -7,6 +7,7 @@ import (
 	"go-api-structure/repository/dbrepo"
 	"log"
 	"net/http"
+	"time"
 )
 
 const port = 8080
@@ -34,6 +35,17 @@ func main() {
 
 	conn, err := app.connectDatabase(app.DSN)
 	app.DB = &dbrepo.MariaDBRepo{DB: conn}
+
+	app.auth = Auth{
+		Issuer:        app.JWTIssuer,
+		Audience:      app.JWTAudience,
+		Secret:        app.JWTSecret,
+		TokenExpiry:   time.Minute * 15,
+		RefreshExpiry: time.Hour * 24,
+		CookiePath:    "/",
+		CookieName:    "__Host-refresh_token",
+		CookieDomain:  app.CookieDomain,
+	}
 	log.Println("Starting application on port", port)
 
 	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())

@@ -11,6 +11,9 @@ func (app *application) routes() http.Handler {
 	mux.Use(middleware.Recoverer)
 	mux.Use(app.enableCORS)
 	mux.Get("/", app.Home)
+	mux.Post("/auth", app.authentication)
+	mux.Post("/sign-up", app.Register)
+	mux.Delete("/delete-user", app.DeleteUser)
 	mux.Get("/movies", app.AllMovies)
 	return mux
 }

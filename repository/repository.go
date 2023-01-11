@@ -8,4 +8,7 @@ import (
 type DatabaseRepo interface {
 	Connection() *gorm.DB
 	AllMovies() ([]*models.Movie, error)
+	GetUserByEmail(email string) (*models.User, error)
+	AddUser(userInformation models.UserSignUp) (bool, error)
+	DeleteUserById(userId int) (bool, error)
 }

@@ -1,8 +1,11 @@
 package dbrepo
 
 import (
+	"errors"
 	"go-api-structure/models"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"log"
 	"time"
 )
 
@@ -54,4 +57,53 @@ func (m *MariaDBRepo) AllMovies() ([]*models.Movie, error) {
 	m.DB.Create(&values)
 	m.DB.Find(&movies).Table("movies").Order("title asc")
 	return movies, nil
+}
+
+func (m *MariaDBRepo) AddUser(userInformation models.UserSignUp) (bool, error) {
+
+	m.DB.AutoMigrate(&models.User{})
+
+	var exist bool
+	m.DB.Raw("select true from users where email = ?", userInformation.Email).Scan(&exist)
+
+	if exist {
+		return false, nil
+	} else {
+		password, err := bcrypt.GenerateFromPassword([]byte(userInformation.Password), bcrypt.DefaultCost)
+		if err != nil {
+			log.Println(err)
+			return false, err
+		}
+		values := models.User{
+			Email:     userInformation.Email,
+			Password:  string(password),
+			FirstName: userInformation.FirstName,
+			LastName:  userInformation.LastName,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+
+		m.DB.Create(&values)
+	}
+
+	return true, nil
+}
+
+func (m *MariaDBRepo) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	m.DB.Find(&user).Where("email = ?", email)
+	log.Println(user)
+	return &user, nil
+}
+
+func (m *MariaDBRepo) DeleteUserById(userId int) (bool, error) {
+	var exist bool
+	m.DB.Raw("select true from users where id = ?", userId).Scan(&exist)
+
+	if !exist {
+		return false, errors.New("id is not exist")
+	}
+
+	m.DB.Raw("delete from users where id = ?", userId).Scan(&exist)
+	return true, nil
 }
