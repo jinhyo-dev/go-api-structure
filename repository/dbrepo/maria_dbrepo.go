@@ -107,3 +107,9 @@ func (m *MariaDBRepo) DeleteUserById(userId int) (bool, error) {
 	m.DB.Raw("delete from users where id = ?", userId).Scan(&exist)
 	return true, nil
 }
+
+func (m *MariaDBRepo) GetUserById(id int) (*models.User, error) {
+	var user models.User
+	m.DB.Find(&user).Where("id = ?", id)
+	return &user, nil
+}

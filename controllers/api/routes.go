@@ -7,13 +7,33 @@ import (
 )
 
 func (app *application) routes() http.Handler {
-	mux := chi.NewRouter()
-	mux.Use(middleware.Recoverer)
-	mux.Use(app.enableCORS)
-	mux.Get("/", app.Home)
-	mux.Post("/auth", app.authentication)
-	mux.Post("/sign-up", app.Register)
-	mux.Delete("/delete-user", app.DeleteUser)
-	mux.Get("/movies", app.AllMovies)
-	return mux
+	r := chi.NewRouter()
+	r.Route("/api", func(r chi.Router) {
+		r.Use(middleware.Recoverer)
+		r.Use(app.enableCORS)
+		r.Get("/", app.Home)
+		r.Get("/refresh", app.refreshToken)
+		r.Post("/auth", app.authentication)
+		r.Post("/sign-up", app.Register)
+		r.Delete("/delete-user", app.DeleteUser)
+		r.Get("/logout", app.logout)
+		r.Get("/movies", app.AllMovies)
+
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(app.authRequired)
+			r.Get("/movies", app.MovieCatalog)
+		})
+	})
+
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+		w.Write([]byte("route does not exist"))
+	})
+
+	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(405)
+		w.Write([]byte("method is not valid"))
+	})
+
+	return r
 }

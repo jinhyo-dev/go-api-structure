@@ -11,4 +11,5 @@ type DatabaseRepo interface {
 	GetUserByEmail(email string) (*models.User, error)
 	AddUser(userInformation models.UserSignUp) (bool, error)
 	DeleteUserById(userId int) (bool, error)
+	GetUserById(id int) (*models.User, error)
 }
