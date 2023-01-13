@@ -8,22 +8,23 @@ import (
 
 func (app *application) routes() http.Handler {
 	r := chi.NewRouter()
-	r.Route("/api", func(r chi.Router) {
-		r.Use(middleware.Recoverer)
-		r.Use(app.enableCORS)
-		r.Get("/", app.Home)
-		r.Get("/refresh", app.refreshToken)
-		r.Post("/auth", app.authentication)
-		r.Post("/sign-up", app.Register)
-		r.Delete("/delete-user", app.DeleteUser)
-		r.Get("/logout", app.logout)
-		r.Get("/movies", app.AllMovies)
+	//r.Route("/api", func(r chi.Router) {
+	r.Use(middleware.Recoverer)
+	r.Use(app.enableCORS)
+	r.Get("/", app.Home)
+	r.Get("/refresh", app.refreshToken)
+	r.Post("/auth", app.authentication)
+	r.Post("/test", app.testReadJSON)
+	r.Post("/sign-up", app.Register)
+	r.Delete("/delete-user", app.DeleteUser)
+	r.Get("/logout", app.logout)
+	r.Get("/movies", app.AllMovies)
 
-		r.Route("/admin", func(r chi.Router) {
-			r.Use(app.authRequired)
-			r.Get("/movies", app.MovieCatalog)
-		})
+	r.Route("/admin", func(r chi.Router) {
+		r.Use(app.authRequired)
+		r.Get("/movies", app.MovieCatalog)
 	})
+	//})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)

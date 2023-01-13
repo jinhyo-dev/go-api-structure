@@ -2,6 +2,7 @@ package dbrepo
 
 import (
 	"errors"
+	"fmt"
 	"go-api-structure/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -91,8 +92,11 @@ func (m *MariaDBRepo) AddUser(userInformation models.UserSignUp) (bool, error) {
 
 func (m *MariaDBRepo) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	m.DB.Find(&user).Where("email = ?", email)
-	log.Println(user)
+	fmt.Println(email)
+	m.DB.Raw("select * from users where email = ?", email).Scan(&user)
+	if len(user.Email) == 0 {
+		return nil, errors.New("user not found")
+	}
 	return &user, nil
 }
 

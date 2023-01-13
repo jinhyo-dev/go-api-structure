@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt/v4"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -32,6 +32,19 @@ func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 	_ = app.writeJSON(w, http.StatusOK, movies)
 }
 
+func (app *application) testReadJSON(w http.ResponseWriter, r *http.Request) {
+	var requestPayload struct {
+		A string `json:"a"`
+		B string `json:"b"`
+	}
+
+	err := app.readJSON(w, r, &requestPayload)
+	if err != nil {
+		fmt.Println("error")
+	}
+	fmt.Println(requestPayload)
+}
+
 func (app *application) authentication(w http.ResponseWriter, r *http.Request) {
 	var requestPayload struct {
 		Email    string `json:"email"`
@@ -39,14 +52,18 @@ func (app *application) authentication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := app.readJSON(w, r, &requestPayload)
+
+	fmt.Println("requestPayload", requestPayload)
+
 	if err != nil {
 		app.errorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
+	fmt.Println(requestPayload.Email)
 	user, err := app.DB.GetUserByEmail(requestPayload.Email)
 	if err != nil {
-		app.errorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
+		app.errorJSON(w, errors.New("user not found"), http.StatusBadRequest)
 		return
 	}
 
@@ -65,10 +82,15 @@ func (app *application) authentication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(tokens.Token)
 	refreshCookie := app.auth.GetRefreshCookie(tokens.RefreshToken)
 	http.SetCookie(w, refreshCookie)
-	app.writeJSON(w, http.StatusAccepted, tokens)
+
+	var payload JSONResponse
+	payload.Success = true
+	payload.Message = "auth success"
+	payload.Data = tokens
+
+	app.writeJSON(w, http.StatusAccepted, payload)
 }
 
 func (app *application) Register(w http.ResponseWriter, r *http.Request) {
